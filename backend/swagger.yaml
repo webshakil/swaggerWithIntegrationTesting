@@ -1,0 +1,427 @@
+---
+openapi: 3.1.0
+info:
+  title: User Authentication API
+  version: "1.670"
+tags:
+- name: Auth
+  description: Authentication Endpoint (public)
+- name: Category
+  description: Category CRUD (private)
+- name: Product
+  description: Product CRUD (private)
+servers:
+- url: http://localhost:8000/api/v1
+  description: Local development server
+- url: https://api.example.com
+  description: Production server
+paths:
+  /register:
+    post:
+      description: Create new user
+      tags:
+      - Auth
+      summary: Sign up a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The user's name
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address
+                password:
+                  type: string
+                  format: password
+                  description: The user's password
+              required:
+              - name
+              - email
+              - password
+            example:
+              name: Shakil kamran
+              email: shakil@gamil.com
+              password: mysecretpassword
+      responses:
+        "201":
+          description: User signup successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: User's name
+                      email:
+                        type: string
+                        format: email
+                        description: User's email address
+                      role:
+                        type: string
+                        description: User's role
+                      address:
+                        type: string
+                        description: User's address
+                  token:
+                    type: string
+                    description: Authentication token for the user
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Bad Request
+                  error:
+                    type: string
+                    example: Invalid input data
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: email
+                        message:
+                          type: string
+                          example: Invalid email
+  /signin:
+    post:
+      description: Login to your account
+      tags:
+      - Auth
+      summary: Login to your accoutn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address
+                password:
+                  type: string
+                  format: password
+                  description: The user's password
+              required:
+              - email
+              - password
+            example:
+              email: shakil@gamil.com
+              password: mysecretpassword
+      responses:
+        "200":
+          description: Login successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Signin Successful
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V4YW1wbGUuYXV0aDAuY29tLyIsImF1ZCI6Imh0dHBzOi8vYXBpLmV4YW1wbGUuY29tL2NhbGFuZGFyL3YxLyIsInN1YiI6InVzcl8xMjMiLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.CA7eaHjIHz5NxeIJoFK9krqaeZrPLwmMmgI_XiQiIkQ
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: /signin
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Bad Request
+                  error:
+                    type: string
+                    example: Invalid input data
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: email
+                        message:
+                          type: string
+                          example: Invalid email
+  /category:
+    post:
+      security:
+      - bearerAuth: []
+      description: Create new category
+      tags:
+      - Category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The user's name
+              required:
+              - name
+            example:
+              name: Node js
+      responses:
+        "200":
+          description: Login successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Signin Successful
+                  data:
+                    type: object
+                    properties: ""
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: /signin
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Bad Request
+                  error:
+                    type: string
+                    example: Invalid input data
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: email
+                        message:
+                          type: string
+                          example: Invalid email
+  /categories/{categoryId}:
+    get:
+      tags:
+      - category
+      description: Get a categories by ID
+      parameters:
+      - in: query
+        name: page
+        description: current page number
+        schema:
+          type: integer
+          format: int32
+          example: 2
+      - in: query
+        name: limit
+        description: maximum items to be returned
+        schema:
+          type: integer
+          format: int32
+          example: 10
+      - in: query
+        name: sort_type
+        description: type of sort (asc or dec)
+        schema:
+          type: integer
+          enum:
+          - asc
+          - dsc
+          example: des
+      responses:
+        "200":
+          description: return a list of categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int32
+                          example: 1
+                        title:
+                          type: string
+                          example: First article
+                  message:
+                    type: string
+                    example: Signin Successful
+        "404":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 400
+                  message:
+                    type: string
+                    example: Bad Request
+                  error:
+                    type: string
+                    example: Invalid input data
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: email
+                        message:
+                          type: string
+                          example: Invalid email
+    put:
+      tags:
+      - category
+      description: Get a categories by ID
+      requestBody:
+        required: true
+        content:
+          application/json: ""
+      responses:
+        "200":
+          description: Category updated successfully
+          content:
+            application/json: ""
+        "404":
+          description: Category not found
+    delete:
+      tags:
+      - category
+      description: Get a categories by ID
+      requestBody:
+        required: true
+        content:
+          application/json: ""
+      responses:
+        "204":
+          description: Category deleted successfully
+        "404":
+          description: Category not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 400
+              message:
+                type: string
+                example: Bad Request
+              error:
+                type: string
+                example: Invalid input data
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email
+  parameters:
+    pageParams:
+      in: query
+      name: page
+      description: current page number
+      schema:
+        type: integer
+        format: int32
+        example: 2
+    limitParams:
+      in: query
+      name: limit
+      description: maximum items to be returned
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    sortTypeParam:
+      in: query
+      name: sort_type
+      description: type of sort (asc or dec)
+      schema:
+        type: integer
+        enum:
+        - asc
+        - dsc
+        example: des
